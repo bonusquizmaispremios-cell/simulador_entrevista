@@ -64,12 +64,24 @@ _cache = get_cache_simulador_entrev()
 CHAVES_SALVAR = ["usuario","historico_simulador_entrevista"]
 
 def gerar_json():
-    return json.dumps({k: st.session_state.get(k) for k in CHAVES_SALVAR}, ensure_ascii=False, indent=2, default=str)
+    return json.dumps({k: st.session_state.get(k) for k in list(st.session_state.keys()) if not k.startswith("_") and k not in ("api_key",)}, ensure_ascii=False, indent=2, default=str)
 
 def carregar_json_sessao(dados):
-    for k,v in dados.items():
-        if k in CHAVES_SALVAR:
-            st.session_state[k] = v
+    _bloq = {'api_key','etapa','nome_login','chave_login','upload_login','btn_entrar_login'}
+    _pref = (
+        'btn_','sel_','ul_','dl_','cad_','_sub','_sm','_tab','_bsc',
+        'ativo_','rem_','sel_pet_','ev_','prof_','hig_','prev_',
+        'vac_','sint_','comp_','trad_','subs_','amb_','viag_','chat_',
+        'duvida_','emerg_','peso_','data_','obs_','tipo_','vet_','desc_',
+        'local_','prox_','alim','sit_emerg_','tc_','oraf','siau','agmag',
+        'lv','mv','pt','pi','sh','wc','rv','rp','rc',
+    )
+    import re as _re
+    for k, v in dados.items():
+        if k in _bloq: continue
+        if any(k.startswith(p) for p in _pref): continue
+        if _re.match(r'.+_\d+$', k): continue
+        st.session_state[k] = v
 
 def salvar_perfil_cache(usuario):
     _cache["perfis"][usuario] = {k: st.session_state.get(k) for k in CHAVES_SALVAR}
@@ -91,7 +103,7 @@ for k,v in defaults.items():
 # ── LOGIN ──
 if st.session_state.etapa == "Login":
     st.markdown("# 🎯 Simulador de Entrevista IA")
-    st.markdown("<div class=\'card\'><b>🔒 ACESSO RESTRITO A CLIENTES DO QUIZ COM PRÊMIOS</b><br>🔗 quizcompremios.com.br</div>", unsafe_allow_html=True)
+    st.markdown("<div class=\'card\'><b>🔒 ACESSO RESTRITO A CLIENTES DO QUIZ COM PRÊMIOS</b><br>🔗 <a href='https://quizcompremios.com.br' target='_blank' style='color:#4F46E5;font-weight:700;text-decoration:underline;'>quizcompremios.com.br</a></div>", unsafe_allow_html=True)
     st.info("💻 **Dica:** Pela complexidade dos agentes, no computador a experiência é mais agradável.")
     with st.container():
         nome  = st.text_input("Seu Nome:", key="nome_login")
@@ -116,6 +128,27 @@ elif st.session_state.etapa == "App":
 
     _tab_home_se, _tab_perfil_se, _tab_simular, _tab_por_cargo, _tab_por_empresa, _tab_comportamental, _tab_tecnicas, _tab_feedback_se, _tab_desempenho_se, _tab_respostas_modelo, _tab_conquistas_se = st.tabs(['🏠 Home', '👤 Meu Perfil Profissional', '🎯 Simular Entrevista', '💼 Por Área/Cargo', '🏢 Por Empresa', '🧠 Perguntas Comportamentais', '💡 Perguntas Técnicas', '🗣️ Feedback em Tempo Real', '📊 Meu Desempenho', '📝 Respostas Modelo', '🏆 Conquistas'])
 
+    # ── BARRA SALVAR — aparece em todas as abas ──
+    with st.expander("💾 Salvar / Carregar meus dados", expanded=False):
+        _bsc1, _bsc2 = st.columns(2)
+        with _bsc1:
+            import json as _jsv
+            _dsv = {k: st.session_state.get(k) for k in list(st.session_state.keys()) if not k.startswith('_') and k not in ('api_key',)}
+            st.download_button("💾 Baixar meus dados (.json)",
+                data=_jsv.dumps(_dsv, ensure_ascii=False, indent=2, default=str),
+                file_name=f"dados_{st.session_state.get('usuario','user')}.json",
+                mime="application/json", key="dl_barra_sv_simulado")
+        with _bsc2:
+            _fupsv = st.file_uploader("📂 Carregar dados salvos:", type=["json"], key="ul_barra_sv_simulado", label_visibility="collapsed")
+            if _fupsv:
+                try:
+                    import json as _jld
+                    for _k2,_v2 in _jld.loads(_fupsv.read().decode()).items():
+                        if _k2 not in ('api_key','etapa'): st.session_state[_k2] = _v2
+                    st.success("✅ Dados restaurados!"); st.rerun()
+                except: st.error("Arquivo inválido.")
+
+
     with _tab_home_se:
         st.title(f"🎯 Olá, {st.session_state.usuario}!")
         st.markdown(f"*Treine como um profissional — passe em qualquer entrevista.*")
@@ -129,7 +162,7 @@ elif st.session_state.etapa == "App":
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
         col_sv, _ = st.columns([1,3])
         with col_sv:
-            st.download_button("💾 Salvar dados (.json)", data=json.dumps({k:st.session_state.get(k) for k in CHAVES_SALVAR}, ensure_ascii=False, indent=2, default=str), file_name=f"simulador_entrevista_{st.session_state.usuario}.json", mime="application/json", key="dl_simula_1")
+            st.download_button("💾 Salvar dados (.json)", data=json.dumps({k: st.session_state.get(k) for k in list(st.session_state.keys()) if not k.startswith("_") and k not in ("api_key",)}, ensure_ascii=False, indent=2, default=str), file_name=f"simulador_entrevista_{st.session_state.usuario}.json", mime="application/json", key="dl_simula_1")
 
     with _tab_perfil_se:
         st.header("👤 Meu Perfil Profissional")
@@ -142,6 +175,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_perfil_se}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_perfil_se = resp.choices[0].message.content
+                        if resultado_perfil_se: st.session_state['res_perfil_se_simula1'] = str(resultado_perfil_se)
                         st.session_state["res_perfil_se"] = resultado_perfil_se
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Meu Perfil Profissional","resumo":prompt_perfil_se[:60],"conteudo":resultado_perfil_se})
                         st.session_state.historico_simulador_entrevista = historico
@@ -164,6 +198,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_simular}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_simular = resp.choices[0].message.content
+                        if resultado_simular: st.session_state['res_simular_simula2'] = str(resultado_simular)
                         st.session_state["res_simular"] = resultado_simular
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Simular Entrevista","resumo":prompt_simular[:60],"conteudo":resultado_simular})
                         st.session_state.historico_simulador_entrevista = historico
@@ -186,6 +221,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_por_cargo}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_por_cargo = resp.choices[0].message.content
+                        if resultado_por_cargo: st.session_state['res_por_cargo_simula3'] = str(resultado_por_cargo)
                         st.session_state["res_por_cargo"] = resultado_por_cargo
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Por Área/Cargo","resumo":prompt_por_cargo[:60],"conteudo":resultado_por_cargo})
                         st.session_state.historico_simulador_entrevista = historico
@@ -208,6 +244,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_por_empresa}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_por_empresa = resp.choices[0].message.content
+                        if resultado_por_empresa: st.session_state['res_por_empresa_simula4'] = str(resultado_por_empresa)
                         st.session_state["res_por_empresa"] = resultado_por_empresa
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Por Empresa","resumo":prompt_por_empresa[:60],"conteudo":resultado_por_empresa})
                         st.session_state.historico_simulador_entrevista = historico
@@ -230,6 +267,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_comportamental}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_comportamental = resp.choices[0].message.content
+                        if resultado_comportamental: st.session_state['res_comportament_simula5'] = str(resultado_comportamental)
                         st.session_state["res_comportamental"] = resultado_comportamental
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Perguntas Comportamentais","resumo":prompt_comportamental[:60],"conteudo":resultado_comportamental})
                         st.session_state.historico_simulador_entrevista = historico
@@ -252,6 +290,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_tecnicas}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_tecnicas = resp.choices[0].message.content
+                        if resultado_tecnicas: st.session_state['res_tecnicas_simula6'] = str(resultado_tecnicas)
                         st.session_state["res_tecnicas"] = resultado_tecnicas
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Perguntas Técnicas","resumo":prompt_tecnicas[:60],"conteudo":resultado_tecnicas})
                         st.session_state.historico_simulador_entrevista = historico
@@ -274,6 +313,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_feedback_se}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_feedback_se = resp.choices[0].message.content
+                        if resultado_feedback_se: st.session_state['res_feedback_se_simula7'] = str(resultado_feedback_se)
                         st.session_state["res_feedback_se"] = resultado_feedback_se
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Feedback em Tempo Real","resumo":prompt_feedback_se[:60],"conteudo":resultado_feedback_se})
                         st.session_state.historico_simulador_entrevista = historico
@@ -296,6 +336,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_desempenho_se}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_desempenho_se = resp.choices[0].message.content
+                        if resultado_desempenho_se: st.session_state['res_desempenho_s_simula8'] = str(resultado_desempenho_se)
                         st.session_state["res_desempenho_se"] = resultado_desempenho_se
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Meu Desempenho","resumo":prompt_desempenho_se[:60],"conteudo":resultado_desempenho_se})
                         st.session_state.historico_simulador_entrevista = historico
@@ -318,6 +359,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_respostas_modelo}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_respostas_modelo = resp.choices[0].message.content
+                        if resultado_respostas_modelo: st.session_state['res_respostas_mo_simula9'] = str(resultado_respostas_modelo)
                         st.session_state["res_respostas_modelo"] = resultado_respostas_modelo
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Respostas Modelo","resumo":prompt_respostas_modelo[:60],"conteudo":resultado_respostas_modelo})
                         st.session_state.historico_simulador_entrevista = historico
@@ -340,6 +382,7 @@ elif st.session_state.etapa == "App":
                         msgs = [{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":prompt_conquistas_se}]
                         resp = client.chat.completions.create(messages=msgs, model="openai/gpt-oss-120b", max_tokens=2048)
                         resultado_conquistas_se = resp.choices[0].message.content
+                        if resultado_conquistas_se: st.session_state['res_conquistas_s_simula10'] = str(resultado_conquistas_se)
                         st.session_state["res_conquistas_se"] = resultado_conquistas_se
                         historico.append({"data":datetime.now().strftime("%d/%m %H:%M"),"aba":"Conquistas","resumo":prompt_conquistas_se[:60],"conteudo":resultado_conquistas_se})
                         st.session_state.historico_simulador_entrevista = historico
