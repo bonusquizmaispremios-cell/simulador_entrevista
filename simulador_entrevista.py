@@ -6,6 +6,18 @@ import json
 st.set_page_config(page_title="Simulador de Entrevista IA", page_icon="🎯", layout="wide")
 
 st.markdown("""
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+[data-testid="stToolbar"] {visibility: hidden;}
+[data-testid="stDecoration"] {visibility: hidden;}
+[data-testid="stStatusWidget"] {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
+
+
+st.markdown("""
     <style>
 
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -103,7 +115,7 @@ for k,v in defaults.items():
 # ── LOGIN ──
 if st.session_state.etapa == "Login":
     st.markdown("# 🎯 Simulador de Entrevista IA")
-    st.markdown("<div class=\'card\'><b>🔒 ACESSO RESTRITO A CLIENTES DO QUIZ COM PRÊMIOS</b><br>🔗 <a href='https://quizcompremios.com.br' target='_blank' style='color:#4F46E5;font-weight:700;text-decoration:underline;'>quizcompremios.com.br</a></div>", unsafe_allow_html=True)
+    st.markdown("<div class=\'card\'><b>🔒 ACESSO RESTRITO A CLIENTES DO MEUSAGENTESIA.COM.BR</b><br>🔗 <a href='https://meusagentesia.com.br' target='_blank' style='color:#4F46E5;font-weight:700;text-decoration:underline;'>meusagentesia.com.br</a></div>", unsafe_allow_html=True)
     st.info("💻 **Dica:** Pela complexidade dos agentes, no computador a experiência é mais agradável.")
     with st.container():
         nome  = st.text_input("Seu Nome:", key="nome_login")
@@ -397,4 +409,4 @@ elif st.session_state.etapa == "App":
 
 # --- RODAPÉ ---
 st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-st.markdown(f"<div style='text-align:center;font-size:0.75em;color:#94A3B8;'>© 2026 Simulador de Entrevista IA · Quiz Com Prêmios</div>", unsafe_allow_html=True)
+st.markdown(f"<div style='text-align:center;font-size:0.75em;color:#94A3B8;'>© 2026 Simulador de Entrevista IA · MeusAgentesIA.com.br</div>", unsafe_allow_html=True)
