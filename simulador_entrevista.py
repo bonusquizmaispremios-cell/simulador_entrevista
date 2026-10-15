@@ -4,8 +4,8 @@ from datetime import datetime
 import json, re
 
 st.set_page_config(
-    page_title="Simulador de Entrevista IA",
-    page_icon="🤖",
+    page_title="Simulador de Entrevistas",
+    page_icon="🎯",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -345,9 +345,10 @@ def chat_input_enviar(chat_key: str, placeholder: str, btn_label: str = "Enviar 
 if st.session_state.etapa == "Login":
     st.markdown("""
     <div style="text-align:center; padding:30px 20px 20px 20px;">
-      <div style="font-size:56px; margin-bottom:8px;">🤖</div>
-      <h1 style="font-size:28px; margin:0; color:#1A1A2E;">PRESENÇA IA</h1>
-      <p style="font-size:13px; color:#4B5563; letter-spacing:2px; margin-top:6px;">PREPARE • SIMULE • TREINE • PASSE</p>
+      <div style="font-size:56px; margin-bottom:8px;">🎯</div>
+      <h1 style="font-size:28px; margin:0; color:#1A1A2E;">Simulador de Entrevistas</h1>
+      <p style="font-size:13px; color:#14532D; font-weight:600; letter-spacing:1px; margin-top:4px;">Prepare-se com Inteligência Artificial</p>
+      <p style="font-size:12px; color:#4B5563; letter-spacing:2px; margin-top:4px;">PREPARE • SIMULE • TREINE • PASSE</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -387,9 +388,9 @@ if st.session_state.etapa == "App":
     chats_ativos = sum(1 for k in SYSTEM_PROMPTS if st.session_state.get(f"chat_{k}"))
     c1, c2, c3 = st.columns([3, 2, 1])
     with c1:
-        st.markdown(f"<h1 style='margin:0;font-size:24px;color:#1A1A2E;'>🤖 Simulador de {st.session_state.usuario}</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='margin:0;font-size:24px;color:#1A1A2E;'>🎯 Simulador de Entrevistas · {st.session_state.usuario}</h1>", unsafe_allow_html=True)
     with c2:
-        nivel_txt = f"{st.session_state.total_respostas} respostas · {chats_ativos} módulos"
+        nivel_txt = f"{st.session_state.total_respostas} treinos · {chats_ativos} módulos"
         st.markdown(f"<div style='padding:14px 0;text-align:right;'><span class='badge-verde' style='padding:6px 14px;font-size:12px;'>{nivel_txt}</span></div>", unsafe_allow_html=True)
     with c3:
         if st.button("🚪 Sair", key="sim_sair"):
@@ -426,31 +427,37 @@ if st.session_state.etapa == "App":
 
     # ── HOME ──
     with abas[0]:
-        st.markdown(f"## 🎯 Olá, {st.session_state.usuario}!")
+        st.markdown(f"## 👋 Olá, {st.session_state.usuario}! Vamos te preparar.")
+        st.markdown(f"""<div class="card">
+            <b>🎯 Como funciona o Simulador de Entrevistas?</b><br><br>
+            Você tem acesso a <b>10 módulos de preparação</b> conduzidos por IA. Cada módulo simula uma situação real de processo seletivo — desde entrevista completa até análise de respostas, prep por empresa e muito mais.<br><br>
+            <b>Escolha um módulo nas abas acima e comece agora.</b>
+        </div>""", unsafe_allow_html=True)
+
         c1h, c2h, c3h, c4h = st.columns(4)
         with c1h:
-            st.markdown(f"""<div class="stat-box"><div class="stat-val">{st.session_state.total_respostas}</div><div class="stat-lbl">Respostas dadas</div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class="stat-box"><div class="stat-val">{st.session_state.total_respostas}</div><div class="stat-lbl">Treinos realizados</div></div>""", unsafe_allow_html=True)
         with c2h:
-            st.markdown(f"""<div class="stat-box"><div class="stat-val">{len(hist)}</div><div class="stat-lbl">Interações totais</div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class="stat-box"><div class="stat-val">{len(hist)}</div><div class="stat-lbl">Interações com IA</div></div>""", unsafe_allow_html=True)
         with c3h:
             st.markdown(f"""<div class="stat-box"><div class="stat-val">{chats_ativos}</div><div class="stat-lbl">Módulos usados</div></div>""", unsafe_allow_html=True)
         with c4h:
             st.markdown(f"""<div class="stat-box"><div class="stat-val">10</div><div class="stat-lbl">Módulos disponíveis</div></div>""", unsafe_allow_html=True)
 
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-        st.markdown('<div class="mono-label">Módulos disponíveis</div>', unsafe_allow_html=True)
+        st.markdown('<div class="mono-label">O que você pode treinar</div>', unsafe_allow_html=True)
 
         modulos = [
-            ("🎯", "Simular Entrevista",   "Entrevista real conduzida pelo agente, pergunta por pergunta"),
-            ("👤", "Meu Perfil",           "Análise e orientações de posicionamento profissional"),
-            ("💼", "Por Área/Cargo",       "Prep específico para a vaga que você está buscando"),
-            ("🏢", "Por Empresa",          "Guia focado na cultura e processo da empresa-alvo"),
-            ("🧠", "Comportamental",       "Treinamento STAR para perguntas situacionais"),
-            ("💡", "Técnicas",             "Perguntas técnicas avaliadas com explicações"),
-            ("🗣️", "Feedback",            "Análise profunda de respostas com versão melhorada"),
-            ("📊", "Desempenho",           "Padrões identificados + plano de melhoria"),
-            ("📝", "Respostas Modelo",     "Respostas de alto nível para as perguntas mais comuns"),
-            ("🏆", "Conquistas",           "Transforme realizações em histórias impactantes"),
+            ("🎯", "Simular Entrevista",   "IA faz perguntas reais de entrevista e avalia cada resposta sua"),
+            ("👤", "Meu Perfil",           "Entenda como se posicionar para a vaga que você quer"),
+            ("💼", "Por Área/Cargo",       "Prep específico: perguntas prováveis para sua vaga"),
+            ("🏢", "Por Empresa",          "Descubra a cultura, processo e o que a empresa valoriza"),
+            ("🧠", "Comportamental",       "Treine método STAR para perguntas situacionais"),
+            ("💡", "Técnicas",             "Responda perguntas técnicas e saiba onde melhorar"),
+            ("🗣️", "Feedback",            "Cole sua resposta e receba diagnóstico + versão melhorada"),
+            ("📊", "Desempenho",           "Identifique seus padrões e receba plano de melhoria"),
+            ("📝", "Respostas Modelo",     "Veja como responder as perguntas mais difíceis"),
+            ("🏆", "Conquistas",           "Transforme suas realizações em histórias impactantes"),
         ]
         for i in range(0, len(modulos), 2):
             cc1, cc2 = st.columns(2)
@@ -464,7 +471,7 @@ if st.session_state.etapa == "App":
 
         if hist:
             st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-            st.markdown('<div class="mono-label">Histórico recente</div>', unsafe_allow_html=True)
+            st.markdown('<div class="mono-label">Últimas sessões de treino</div>', unsafe_allow_html=True)
             for item in reversed(hist[-6:]):
                 st.markdown(f"""<div class="hist-item">
                     <small style="color:#6B7280;">{item['data']} · {item['aba']}</small><br>
@@ -472,84 +479,84 @@ if st.session_state.etapa == "App":
                 </div>""", unsafe_allow_html=True)
 
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-        st.download_button("💾 Salvar dados da sessão (.json)", data=gerar_json_dados(),
-            file_name=f"simulador_entrevista_{st.session_state.usuario}.json",
+        st.download_button("💾 Salvar meu progresso (.json)", data=gerar_json_dados(),
+            file_name=f"simulador_entrevistas_{st.session_state.usuario}.json",
             mime="application/json", key="dl_home")
 
     # ── PERFIL ──
     with abas[1]:
         st.markdown("## 👤 Meu Perfil Profissional")
-        st.markdown('<div class="card-warn">💡 <b>Como usar:</b> Descreva sua trajetória, cargo atual, anos de experiência, área e objetivo. O agente analisa seu perfil e dá orientações de posicionamento.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-warn">💡 <b>Como usar:</b> Conte sua trajetória — cargo atual, anos de experiência, área e para onde quer ir. A IA analisa seu perfil e diz como você deve se apresentar para a vaga dos seus sonhos.</div>', unsafe_allow_html=True)
         render_chat("perfil")
-        chat_input_enviar("perfil", "Ex: Sou analista de dados com 3 anos de experiência em SQL e Python, quero migrar para engenharia de dados. Como me posicionar?")
+        chat_input_enviar("perfil", "Ex: Sou analista de dados com 3 anos de experiência em SQL e Python, quero migrar para engenharia de dados. Como devo me posicionar nas entrevistas?")
 
     # ── SIMULAR ──
     with abas[2]:
         st.markdown("## 🎯 Simular Entrevista")
-        st.markdown('<div class="card-success">✅ <b>Modo entrevista real:</b> O agente conduz a entrevista completa. Diga o cargo e nível. Ele fará perguntas uma por vez e avaliará cada resposta.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-success">✅ <b>Entrevista real simulada:</b> A IA age como entrevistador e conduz a entrevista completa. Informe o cargo e nível desejado — ela fará perguntas uma por vez e avaliará cada resposta sua com feedback imediato.</div>', unsafe_allow_html=True)
         render_chat("simular")
-        chat_input_enviar("simular", "Ex: Quero simular uma entrevista para Desenvolvedor Full-Stack Pleno em startup de fintech. Pode começar?")
+        chat_input_enviar("simular", "Ex: Quero simular uma entrevista para Desenvolvedor Full-Stack Pleno numa startup de fintech. Pode começar?")
 
     # ── POR CARGO ──
     with abas[3]:
-        st.markdown("## 💼 Por Área/Cargo")
-        st.markdown('<div class="card"><div class="mono-label">💼 Prep por Área/Cargo</div>Descreva a vaga e o agente gera as perguntas mais prováveis para aquela posição, com respostas modelo.</div>', unsafe_allow_html=True)
+        st.markdown("## 💼 Prep por Área/Cargo")
+        st.markdown('<div class="card">📋 <b>Como usar:</b> Descreva a vaga que você está buscando. A IA lista as perguntas mais prováveis para aquela posição e te mostra como responder bem cada uma.</div>', unsafe_allow_html=True)
         render_chat("cargo")
         chat_input_enviar("cargo", "Ex: Vou entrevistar para Product Manager Sênior numa empresa de e-commerce B2B. Quais perguntas devo esperar?")
 
     # ── POR EMPRESA ──
     with abas[4]:
-        st.markdown("## 🏢 Por Empresa")
-        st.markdown('<div class="card"><div class="mono-label">🏢 Inteligência de Processo Seletivo</div>Diga para qual empresa você vai entrevistar e o agente prepara um guia completo.</div>', unsafe_allow_html=True)
+        st.markdown("## 🏢 Prep por Empresa")
+        st.markdown('<div class="card">🔍 <b>Como usar:</b> Diga o nome da empresa onde você vai entrevistar. A IA prepara um guia completo: cultura, valores, formato típico do processo e o que eles mais valorizam nos candidatos.</div>', unsafe_allow_html=True)
         render_chat("empresa")
-        chat_input_enviar("empresa", "Ex: Vou entrevistar para o Nubank para vaga de engenheiro de software. Como é o processo e o que valorizam?")
+        chat_input_enviar("empresa", "Ex: Vou entrevistar no Nubank para vaga de engenheiro de software. Como é o processo seletivo deles e o que valorizam?")
 
     # ── COMPORTAMENTAL ──
     with abas[5]:
-        st.markdown("## 🧠 Perguntas Comportamentais")
-        st.markdown('<div class="card"><div class="mono-label">🧠 Método STAR</div>Treine respostas situacionais. O agente avalia se você usou Situação → Tarefa → Ação → Resultado.</div>', unsafe_allow_html=True)
+        st.markdown("## 🧠 Treino Comportamental")
+        st.markdown('<div class="card">🌟 <b>Como usar:</b> Peça perguntas comportamentais para o cargo que você quer. Responda e a IA avalia se você usou o método STAR (Situação → Tarefa → Ação → Resultado) e como melhorar.</div>', unsafe_allow_html=True)
         render_chat("comportamental")
-        chat_input_enviar("comportamental", "Ex: Me faça 5 perguntas comportamentais para vaga de liderança técnica e avalie minhas respostas.")
+        chat_input_enviar("comportamental", "Ex: Me faça 5 perguntas comportamentais para vaga de liderança técnica e avalie minhas respostas com o método STAR.")
 
     # ── TÉCNICAS ──
     with abas[6]:
-        st.markdown("## 💡 Perguntas Técnicas")
-        st.markdown('<div class="card"><div class="mono-label">💡 Avaliação Técnica</div>O agente faz perguntas técnicas adequadas ao seu nível e avalia profundidade e precisão.</div>', unsafe_allow_html=True)
+        st.markdown("## 💡 Treino de Perguntas Técnicas")
+        st.markdown('<div class="card">⚡ <b>Como usar:</b> Diga sua área e nível de experiência. A IA simula as perguntas técnicas que você vai encontrar na entrevista e explica onde sua resposta pode ser mais completa.</div>', unsafe_allow_html=True)
         render_chat("tecnica")
         chat_input_enviar("tecnica", "Ex: Sou desenvolvedor Python backend pleno. Pode me entrevistar com foco em APIs REST e bancos de dados?")
 
     # ── FEEDBACK ──
     with abas[7]:
-        st.markdown("## 🗣️ Feedback em Tempo Real")
-        st.markdown('<div class="card"><div class="mono-label">🗣️ Análise de Resposta</div>Cole aqui uma pergunta + sua resposta. O agente dá diagnóstico completo com versão melhorada.</div>', unsafe_allow_html=True)
+        st.markdown("## 🗣️ Feedback na Minha Resposta")
+        st.markdown('<div class="card">🎙️ <b>Como usar:</b> Cole uma pergunta que te fizeram + a resposta que você deu. A IA analisa o que foi bem, o que faltou e te entrega uma versão melhorada da sua resposta.</div>', unsafe_allow_html=True)
         render_chat("feedback")
-        chat_input_enviar("feedback", 'Ex: Pergunta: "Fale sobre um desafio que você superou."\nMinha resposta: "Uma vez tive um prazo apertado e entreguei mesmo assim."')
+        chat_input_enviar("feedback", 'Ex:\nPergunta: "Fale sobre um desafio que você superou."\nMinha resposta: "Uma vez tive um prazo muito apertado e entreguei o projeto mesmo assim."')
 
     # ── DESEMPENHO ──
     with abas[8]:
-        st.markdown("## 📊 Meu Desempenho")
-        st.markdown('<div class="card"><div class="mono-label">📊 Análise de Padrões</div>Descreva como têm sido suas entrevistas, onde você trava, o que costuma ouvir. O agente cria um plano de melhoria.</div>', unsafe_allow_html=True)
+        st.markdown("## 📊 Análise do Meu Desempenho")
+        st.markdown('<div class="card">📈 <b>Como usar:</b> Conte como têm sido suas entrevistas — onde você trava, o que costuma ouvir, em qual etapa reprova. A IA identifica seus padrões e cria um plano de ação personalizado.</div>', unsafe_allow_html=True)
         render_chat("desempenho")
-        chat_input_enviar("desempenho", "Ex: Já fiz 4 entrevistas esse mês. Passo a técnica mas não passo na etapa comportamental/cultural. Como melhorar?")
+        chat_input_enviar("desempenho", "Ex: Já fiz 4 entrevistas esse mês. Passo na fase técnica mas não passo no comportamental/cultural. O que pode estar acontecendo?")
 
     # ── RESPOSTAS MODELO ──
     with abas[9]:
         st.markdown("## 📝 Respostas Modelo")
-        st.markdown('<div class="card"><div class="mono-label">📝 Biblioteca de Respostas</div>Diga a pergunta e o cargo/contexto. O agente gera uma resposta de alto nível para você adaptar.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card">💬 <b>Como usar:</b> Diga a pergunta difícil que você não sabe responder + o cargo/contexto. A IA gera uma resposta modelo de alto nível para você estudar e adaptar com sua história real.</div>', unsafe_allow_html=True)
         render_chat("modelo")
-        chat_input_enviar("modelo", 'Ex: Gere uma resposta modelo para "Qual seu maior defeito?" para vaga de engenheiro de software sênior.')
+        chat_input_enviar("modelo", 'Ex: Como responder "Qual seu maior defeito?" para uma vaga de engenheiro de software sênior? Quero um modelo forte.')
 
     # ── CONQUISTAS ──
     with abas[10]:
-        st.markdown("## 🏆 Conquistas")
-        st.markdown('<div class="card"><div class="mono-label">🏆 Storytelling Profissional</div>Descreva uma conquista sua, mesmo que simplesmente. O agente transforma em história impactante com dados.</div>', unsafe_allow_html=True)
+        st.markdown("## 🏆 Transformar Conquistas em Histórias")
+        st.markdown('<div class="card">✨ <b>Como usar:</b> Descreva uma coisa que você fez no trabalho, mesmo que pareça simples. A IA transforma em uma história profissional impactante com dados e estrutura STAR, pronta para usar na entrevista.</div>', unsafe_allow_html=True)
         render_chat("conquistas")
-        chat_input_enviar("conquistas", "Ex: Automatizei um relatório que levava 2 horas para ficar pronto. Como transformar isso numa boa história para entrevista?")
+        chat_input_enviar("conquistas", "Ex: Automatizei um relatório que levava 2 horas para ficar pronto. Ajuda a transformar isso numa história forte para entrevista?")
 
     # ── RODAPÉ ──
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
     st.markdown("""
     <div style="text-align:center;font-size:12px;color:#9CA3AF;padding:8px 0;">
-      © 2026 Simulador de Entrevista IA · meusagentesia.com.br · Powered by Groq
+      © 2026 Simulador de Entrevistas · meusagentesia.com.br · Powered by Groq
     </div>
     """, unsafe_allow_html=True)
