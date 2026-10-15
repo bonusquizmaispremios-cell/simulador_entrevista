@@ -236,6 +236,7 @@ defaults = {
     "historico_simulador_entrevista": [],
     "total_respostas": 0,
     **{f"chat_{k}": [] for k in SYSTEM_PROMPTS.keys()},
+    **{f"erro_{k}": "" for k in SYSTEM_PROMPTS.keys()},
 }
 for k, v in defaults.items():
     if k not in st.session_state:
@@ -313,28 +314,40 @@ def chat_input_enviar(chat_key: str, placeholder: str, btn_label: str = "Enviar 
         st.session_state[f"chat_{chat_key}"] = []
         st.rerun()
 
+    # exibe erro persistido de chamada anterior
+    erro_key = f"erro_{chat_key}"
+    if st.session_state.get(erro_key):
+        st.error(st.session_state[erro_key])
+        st.session_state[erro_key] = ""
+
     if enviar and txt.strip():
+        mensagem = txt.strip()
+        st.session_state[f"input_{chat_key}"] = ""
         chat = st.session_state[f"chat_{chat_key}"]
-        chat.append({"role": "user", "content": txt.strip(), "hora": hora()})
         with st.spinner("Agente processando..."):
             try:
                 client = Groq(api_key=st.session_state.api_key)
+                # inclui a mensagem do usuário apenas no payload da API (ainda não no chat)
                 msgs_api = [{"role": m["role"], "content": m["content"]} for m in chat]
+                msgs_api.append({"role": "user", "content": mensagem})
                 resp = client.chat.completions.create(
                     messages=[{"role": "system", "content": SYSTEM_PROMPTS[chat_key]}] + msgs_api,
                     model=MODEL, max_tokens=2048
                 )
                 resposta = resp.choices[0].message.content
+                # só salva no histórico se a API respondeu com sucesso
+                chat.append({"role": "user", "content": mensagem, "hora": hora()})
                 chat.append({"role": "assistant", "content": resposta, "hora": hora()})
                 st.session_state[f"chat_{chat_key}"] = chat
                 st.session_state.total_respostas += 1
                 st.session_state.historico_simulador_entrevista.append({
                     "data": datetime.now().strftime("%d/%m %H:%M"),
                     "aba": chat_key,
-                    "resumo": txt[:60],
+                    "resumo": mensagem[:60],
                 })
             except Exception as e:
-                st.error(f"Erro na API Groq: {e}")
+                # persiste erro para exibir após rerun
+                st.session_state[erro_key] = f"❌ Erro na API Groq: {e}"
         st.rerun()
     elif enviar:
         st.warning("Digite algo antes de enviar.")
